@@ -10,15 +10,24 @@ import UIKit
 
 class ToDoListViewController: UITableViewController {
 
-    var itemArray = ["Buy milk", "Study IOS programming", "Get kids ready for school"]
+    var itemArray = [Item]()
     
     var defaults = UserDefaults.standard
     
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view, typically from a nib.
+        let newItem1 = Item()
+        newItem1.title = "Buy milk"
+        itemArray.append(newItem1)
         
-        if let items = defaults.array(forKey: "ToDoListArray") as? [String] {
+        let newItem2 = Item()
+        newItem2.title = "Study IOS programming"
+        itemArray.append(newItem2)
+
+        
+        
+        if let items = defaults.array(forKey: "ToDoListArray") as? [Item] {
             print(items)
             itemArray = items
         }
@@ -28,8 +37,10 @@ class ToDoListViewController: UITableViewController {
        
         let cell = tableView.dequeueReusableCell(withIdentifier: "ToDoList", for: indexPath)
         
-        cell.textLabel?.text = itemArray[indexPath.row]
-        
+        cell.textLabel?.text = itemArray[indexPath.row].title
+    
+        cell.accessoryType = itemArray[indexPath.row].done ? .checkmark : .none
+
         return cell
     }
     
@@ -42,8 +53,10 @@ class ToDoListViewController: UITableViewController {
     //MARK - tableview delegate methods
     
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+  
+        itemArray[indexPath.row].done = !itemArray[indexPath.row].done
         
-        tableView.cellForRow(at: indexPath)?.accessoryType = tableView.cellForRow(at: indexPath)?.accessoryType == .checkmark ? .none : .checkmark
+        tableView.reloadData()
         
         tableView.deselectRow(at: indexPath, animated: true)
         
@@ -60,7 +73,9 @@ class ToDoListViewController: UITableViewController {
         let action = UIAlertAction(title: "Add Item", style: .default) { (action) in
             // things will happen when te user clicks the add item
             if let text = textField.text {
-                self.itemArray.append(text)
+                let newItem = Item()
+                newItem.title = text
+                self.itemArray.append(newItem)
             }
             
             self.defaults.set(self.itemArray, forKey: "ToDoListArray")
