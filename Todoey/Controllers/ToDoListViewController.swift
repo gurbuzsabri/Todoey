@@ -9,7 +9,7 @@
 import UIKit
 import RealmSwift
 
-class ToDoListViewController: UITableViewController {
+class ToDoListViewController: SwipeTableViewController {
 
     var todoItems: Results<Item>?
     
@@ -25,33 +25,14 @@ class ToDoListViewController: UITableViewController {
         super.viewDidLoad()
         // Do any additional setup after loading the view, typically from a nib.
         
-      
+        print(FileManager.default.urls(for: .documentDirectory, in: .userDomainMask))
         
-       print(FileManager.default.urls(for: .documentDirectory, in: .userDomainMask))
-        
-        
-//        let newItem1 = Item()
-//        newItem1.title = "Buy milk"
-//        itemArray.append(newItem1)
-//
-//        let newItem2 = Item()
-//        newItem2.title = "Study IOS programming"
-//        itemArray.append(newItem2)
-
-//        loadItems()
-        
-        
-//
-//        if let items = defaults.array(forKey: "ToDoListArray") as? [Item] {
-//            print(items)
-//            itemArray = items
-//        }
     }
     
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
        
-        let cell = tableView.dequeueReusableCell(withIdentifier: "ToDoList", for: indexPath)
-        
+        let cell = super.tableView(tableView, cellForRowAt: indexPath)
+    
         if let item = todoItems?[indexPath.row] {
             cell.textLabel?.text = item.title
             
@@ -135,23 +116,26 @@ class ToDoListViewController: UITableViewController {
         present(alert, animated: true, completion: nil)
     }
     
-//    func saveItems() {
-//
-//        do {
-//           try self.context.save()
-//        }
-//        catch {
-//           print("Error saving context \(error)")
-//        }
-//
-//         tableView.reloadData()
-//    }
     
     func loadItems() {
         
         todoItems = selectedCategory?.items.sorted(byKeyPath: "title", ascending: true)
         
         tableView.reloadData()
+    }
+    
+    override func updateDataModel(at indexPath: IndexPath) {
+        if let item = todoItems?[indexPath.row] {
+            
+            do {
+                try realm.write {
+                    realm.delete(item)
+                }
+            }
+            catch {
+                print("Error deleting item \(error)")
+            }
+        }
     }
     
 }
